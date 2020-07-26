@@ -1,0 +1,84 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+import scipy.stats as st
+
+
+# Study data files
+mouse_metadata_path = "C:/Users/regin/Desktop/vu-nsh-data-pt-06-2020-u-c/02-Homework/05-Matplotlib/Instructions/Pymaceuticals/data/Mouse_metadata.csv"
+study_results_path = "C:/Users/regin/Desktop/vu-nsh-data-pt-06-2020-u-c/02-Homework/05-Matplotlib/Instructions/Pymaceuticals/data/Study_results.csv"
+
+# Read the mouse data and the study results
+mouse_metadata = pd.read_csv(mouse_metadata_path)
+study_results = pd.read_csv(study_results_path)
+
+# Combine the data into a single dataset
+complete_data= pd.merge(study_results, mouse_metadata, how="left", on="Mouse ID")
+
+complete_data.head(20)
+
+
+
+# Get all the data for the duplicate mouse ID. 
+duplicate_mouse_data = complete_data.loc[complete_data["Mouse ID"] == "o725"]
+
+duplicate_mouse_data
+
+clean_data=complete_data[complete_data["Mouse ID"].isin(duplicate_mouse_id)==False]
+clean_data.head()
+
+# This method is the most straighforward, creating multiple series and putting them all together at the end.
+means = clean_data.groupby('Drug Regimen').mean()['Tumor Volume (mm3)']
+medians = clean_data.groupby('Drug Regimen').median()['Tumor Volume (mm3)']
+variances = clean_data.groupby('Drug Regimen').var()['Tumor Volume (mm3)']
+sds = clean_data.groupby('Drug Regimen').std()['Tumor Volume (mm3)']
+sems = clean_data.groupby('Drug Regimen').sem()['Tumor Volume (mm3)']
+complete_table = pd.DataFrame({"Mean Tumor Volume":means,"Median Tumor Volume":medians, "Tumor Volume Variance":variances,
+                              "Tumor Volume Std. Dev.":sds, "Tumor Volume Std. Err.":sems})
+
+complete_table
+
+
+# Generate a bar plot showing the total number of mice for each treatment throughout the course of the study
+
+counts = clean_data['Drug Regimen'].value_counts()
+counts.plot(kind="bar")
+plt.xlabel("Regimen")
+plt.xticks(rotation=90)
+plt.ylabel("Total Volume")
+plt.show()
+
+
+# Generate a bar plot showing the total number of mice for each treatment throughout the course of the study using pyplot.
+
+counts = clean_data['Drug Regimen'].value_counts()
+plt.bar(counts.index.values,counts.values)
+plt.xlabel("Regimen")
+plt.xticks(rotation=90)
+plt.ylabel("Total Volume")
+plt.grid
+plt.show()
+
+
+
+counts = clean_data.Sex.value_counts()
+counts.plot
+plt.show()
+
+
+# Generate a pie plot showing gender
+counts = clean_data.Sex.value_counts()
+plt.pie(counts.values,labels=counts.index.values)
+plt.ylabel("Gender")
+plt.show()
+
+
+#Generate a line plot of time point versus tumor volume for a mouse
+
+naftisol_table = clean_data.loc[clean_data['Drug Regimen'] == "Naftisol"]
+mousedata = naftisol_table.loc[naftisol_table['Mouse ID']== 'o725']
+plt.plot(mousedata['Timepoint'],mousedata['Tumor Volume (mm3)'])
+plt.xlabel('Days')
+plt.ylabel('Tumor Volume')
+plt.title('Naftisol treatment of mouse o725')
+plt.grid
+plt.show()
